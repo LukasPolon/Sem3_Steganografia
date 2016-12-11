@@ -4,13 +4,15 @@ from Crypto import Random
 import sys
 import struct
 import hashlib
+import subprocess
 
 class Crypto(object):
-    def __init__(self, message, password):
-        self.message = message
+    def __init__(self, password, msg=None, enc_msg=None):
         self.password = password
-        self.encrypted_message = None
+        self.message = msg
+        self.enc_message = enc_msg
         self.sha_passw = None
+        self.pas_confirm = None
 
     @property
     def _sha_passw(self):
@@ -23,32 +25,52 @@ class Crypto(object):
                 
         """
         if self.sha_passw is None:
-            h = hashlib.sha256(b'%s' % self.message)
+            h = hashlib.sha256(b'%s' % self.password)
             self.sha_passw = h.digest()
 
         return self.sha_passw
 
-    @property
-    def _encrypted_message(self):
+    def encrypt(self):
         """
             Encryption of given text message
             Performed by AES algorithm
+
+            Returns:
+                msg(str): encrypted message
         """
-        if self.encrypted_message is None:
+        if self.message is not None:
+            print('password: ' + self._sha_passw)
             key = b'%s' % self._sha_passw
             iv = Random.new().read(AES.block_size)
             cipher = AES.new(key, AES.MODE_CFB, iv)
             msg = iv + cipher.encrypt(b'%s' % self.message)
-        return msg
+
+            return msg
 
     def decrypt(self):
         """
             Decryption of encrypted message.
             Performed by AES algoritm.
+        
+            Args:
+                enc_message(str): message to decrypt
+
+            Returns:
+                msg(str): decrypted message
         """
-        pass
+        if self.enc_message is not None:
+            print('password: ' + self._sha_passw)
+            key = b'%s' % self._sha_passw
+            iv = Random.new().read(AES.block_size)
+            cipher = AES.new(key, AES.MODE_CFB, iv)
+            msg = cipher.decrypt(self.enc_message)
+            return msg[len(iv):]
 
 
 if __name__ == '__main__':
-    ob = Crypto('abcd', 'pa')
-    print(ob._encrypted_message)
+    ob = Crypto('p', msg='Zakodowana wiadomosc')
+    encrypted = ob.encrypt()
+    print(encrypted)
+    ob2 = Crypto('p', enc_msg=encrypted)
+    decrypted = ob2.decrypt()
+    print(decrypted)
