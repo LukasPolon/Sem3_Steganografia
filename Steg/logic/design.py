@@ -24,51 +24,67 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_MainWindow(object):
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(1257, 600)
+
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        
         self.horizontalLayoutWidget = QtGui.QWidget(self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(20, 10, 1001, 541))
-        self.horizontalLayoutWidget.setObjectName(_fromUtf8("horizontalLayoutWidget"))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(
+                                                        20, 10, 1001, 541))
+        self.horizontalLayoutWidget.setObjectName(_fromUtf8(
+                                                    "horizontalLayoutWidget"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        
         self.picture_before = QtGui.QLabel(self.horizontalLayoutWidget)
         self.picture_before.setObjectName(_fromUtf8("picture_before"))
         self.horizontalLayout.addWidget(self.picture_before)
+        
         self.picture_after = QtGui.QLabel(self.horizontalLayoutWidget)
         self.picture_after.setObjectName(_fromUtf8("picture_after"))
         self.horizontalLayout.addWidget(self.picture_after)
+
         self.verticalLayoutWidget = QtGui.QWidget(self.centralwidget)
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(1040, 10, 211, 541))
-        self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
+        self.verticalLayoutWidget.setObjectName(_fromUtf8(
+                                                "verticalLayoutWidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        
         self.load_file_button = QtGui.QPushButton(self.verticalLayoutWidget)
         self.load_file_button.setObjectName(_fromUtf8("load_file_button"))
         self.verticalLayout.addWidget(self.load_file_button)
-        self.save_changed_file_button = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.save_changed_file_button.setObjectName(_fromUtf8("save_changed_file_button"))
+        self.verticalLayout.addWidget(self.load_file_button)
+        
+        self.save_changed_file_button = QtGui.QPushButton(
+                                                    self.verticalLayoutWidget)
+        self.save_changed_file_button.setObjectName(
+                                        _fromUtf8("save_changed_file_button"))
         self.verticalLayout.addWidget(self.save_changed_file_button)
+
         self.insert_text_button = QtGui.QPushButton(self.verticalLayoutWidget)
         self.insert_text_button.setObjectName(_fromUtf8("insert_text_button"))
         self.verticalLayout.addWidget(self.insert_text_button)
 
-        # self.inserted_text = QtGui.QTextEdit(self.verticalLayoutWidget)
         self.inserted_text = QtGui.QLineEdit(self.verticalLayoutWidget)
         self.read_text = QtGui.QLineEdit(self.verticalLayoutWidget)
-
         self.inserted_text.setObjectName(_fromUtf8("inserted_text"))
         self.verticalLayout.addWidget(self.inserted_text)
+        
         self.read_text_button = QtGui.QPushButton(self.verticalLayoutWidget)
         self.read_text_button.setObjectName(_fromUtf8("read_text_button"))
         self.verticalLayout.addWidget(self.read_text_button)
         self.read_text.setObjectName(_fromUtf8("read_text"))
         self.verticalLayout.addWidget(self.read_text)
+        
         self.horizontalLayoutWidget.raise_()
         self.picture_after.raise_()
         self.verticalLayoutWidget.raise_()
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1257, 25))
@@ -125,6 +141,7 @@ class Ui_MainWindow(object):
         text = self.inserted_text.text()
         enc = Crypto(passwd, msg=text)
         enc_text = enc.encrypt()
+        steg = steganography.Steganography(img, message=enc_text)
 
         path = str(self.img_obj)
         filename = path.split('/')
@@ -133,7 +150,7 @@ class Ui_MainWindow(object):
         filename.append(fn)
         new_path = os.path.join(*filename)
         new_path = '/' + new_path
-        img_enc = steganography.encode_image(img, enc_text)
+        img_enc = steg.encode_image()
         img_enc.save(new_path)
 
         self.select_file_after(new_path)
@@ -141,7 +158,8 @@ class Ui_MainWindow(object):
     def readtext(self):
         img = Image.open(str(self.img_obj))
         passwd = self.read_text.text()
-        msg = steganography.decode_image(img)
+        steg = steganography.Steganography(img)
+        msg = steg.decode_image()
 
         decr = Crypto(passwd, enc_msg=msg)
         end_msg = decr.decrypt()
